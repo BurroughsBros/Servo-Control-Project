@@ -1,0 +1,4 @@
+../Core/Src/terminal.c:16:6:terminal_init	1
+../Core/Src/terminal.c:19:6:terminal_receive	3
+../Core/Src/terminal.c:30:6:terminal_print	1
+../Core/Src/terminal.c:35:6:terminal_clearBuff	2

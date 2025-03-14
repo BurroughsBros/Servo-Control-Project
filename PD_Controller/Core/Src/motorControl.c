@@ -20,8 +20,10 @@ void motor_initEncoder(TIM_HandleTypeDef timmerHandler){
 }
 void motor_initPWM(TIM_HandleTypeDef timmerHandler){
 	PWMHandle = timmerHandler;
-	timmerChannel1 = 1;
-	timmerChannel2 = 2;
+	timmerChannel1 = TIM_CHANNEL_1;
+	timmerChannel2 = TIM_CHANNEL_2;
+	HAL_TIM_PWM_Start(&PWMHandle, timmerChannel1);
+	HAL_TIM_PWM_Start(&PWMHandle, timmerChannel2);
 }
 void motor_PWMSetForward(int x){
 	__HAL_TIM_SET_COMPARE(&PWMHandle, timmerChannel1, x);

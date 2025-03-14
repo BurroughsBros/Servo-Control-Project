@@ -1,0 +1,88 @@
+/*
+ * terminal.c
+ *
+ *  Created on: Jan 19, 2025
+ *      Author: jotto
+ */
+
+#include "terminal.h"
+
+// Variables
+UART_HandleTypeDef terminal_uart;
+
+int ok_transmit;
+const char notice[]=
+		"Copyright (c) \r\n"
+		"1996-2024\r\n";
+
+// Structures
+struct cursor {
+	int x;
+	int y;
+} cursor;
+
+// Functions
+void terminal_init(UART_HandleTypeDef huart){
+	terminal_uart = huart;
+	terminal_print("\eR@");	/* Auto Wrap Off */
+	terminal_print("\eS");	/* Auto Scroll Off */
+	terminal_print("\eTA");	/* Auto Line Feed on (CR => CR+LF) */
+	terminal_print("\eaC");	/* key click and repeat on */
+	terminal_print("\ebB");	/* cursor mode = block */
+	terminal_print("\eH");	/* cursor to home */
+	terminal_print("\ex@");	/* change ok for contrast, baud rate, & data format*/
+	terminal_print("\ei");	/* save setup to EEPROM */
+	terminal_clear();
+	ok_transmit=XON;	/* keep track of Xon/Xoff from terminal */
+}
+void terminal_receive(uint8_t *rxBuff, size_t size){
+	// receive loop
+	for(int i=0; i<size; i++){
+	  HAL_UART_Receive(&terminal_uart, &rxBuff[i], 1, TIMEOUT);
+	  if((rxBuff[i] == '\r') | (rxBuff[i] == '\n')){
+		  rxBuff[i] = '\r';
+		  rxBuff[i+1] = '\n';
+		  break;
+	  }
+	  else if(rxBuff[i] == '\x1B['){
+		  break;
+	  }
+	}
+}
+void terminal_print(char *txBuff){
+	// Has to be null terminated!
+	size_t len = strlen((char*)txBuff);
+	HAL_UART_Transmit(&terminal_uart, txBuff, len, TIMEOUT);
+#ifdef BLINK
+	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+#endif
+}
+void terminal_printNotice(void){
+	terminal_print(notice);
+}
+void terminal_clearBuff(char *buff){
+	size_t len = strlen(buff);
+	for(int i=0; i<len; i++){
+		buff[i] = '\0';
+	}
+}
+void terminal_cursorSet(int x, int y){
+	char message[100] = {'\0'};
+	if(x < 0) x = 0;
+	if(x > MAX_X) x = MAX_X;
+	if(y < 0) y = 0;
+	if(y > MAX_Y) y = MAX_Y;
+
+	sprintf(message, "\x1B[%x;%xH", x, y); // escape I, row, column
+	terminal_print(message);
+
+	cursor.x = x;
+	cursor.y = y;
+}
+void terminal_cursorHome(void){
+	terminal_print("\x1B[H");
+}
+void terminal_clear(void){
+	terminal_print("\x1B[2J");
+	terminal_print("\x1B[H");
+}
