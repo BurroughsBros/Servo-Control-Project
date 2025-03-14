@@ -102,6 +102,9 @@ int main(void)
   while (1)
   {
 	  x = motor_getCount();
+	  while(motor_getCount() <= 5000){
+		  motor_PWMSetForward(500);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
