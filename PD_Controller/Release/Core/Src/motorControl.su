@@ -1,0 +1,5 @@
+../Core/Src/motorControl.c:16:6:motor_initEncoder	8	static
+../Core/Src/motorControl.c:21:6:motor_initPWM	16	static
+../Core/Src/motorControl.c:28:6:motor_PWMSetForward	0	static
+../Core/Src/motorControl.c:32:6:motor_PWMSetBackward	0	static
+../Core/Src/motorControl.c:36:5:motor_getCount	0	static

@@ -1,0 +1,5 @@
+../Core/Src/terminal.c:16:6:terminal_init	8	static
+../Core/Src/terminal.c:19:6:terminal_receive	16	static
+../Core/Src/terminal.c:30:6:terminal_print	8	static
+../Core/Src/terminal.c:35:6:terminal_print_IT	8	static
+../Core/Src/terminal.c:40:6:terminal_clearBuff	8	static

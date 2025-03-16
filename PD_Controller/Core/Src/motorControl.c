@@ -6,22 +6,22 @@
  */
 
 #include "motorControl.h"
-#include "main.h"
 
+// Variables
 TIM_HandleTypeDef encoderHandle;
 TIM_HandleTypeDef PWMHandle;
 int timmerChannel1 = 0;
 int timmerChannel2 = 0;
 
-void motor_initEncoder(TIM_HandleTypeDef timmerHandler){
+void motor_initEncoder(TIM_HandleTypeDef timmerHandler, uint32_t channel1, uint32_t channel2){
 	encoderHandle = timmerHandler;
-	HAL_TIM_Encoder_Start(&encoderHandle, 1);
-	HAL_TIM_Encoder_Start(&encoderHandle, 2);
+	HAL_TIM_Encoder_Start(&encoderHandle, channel1);
+	HAL_TIM_Encoder_Start(&encoderHandle, channel2);
 }
-void motor_initPWM(TIM_HandleTypeDef timmerHandler){
+void motor_initPWM(TIM_HandleTypeDef timmerHandler, uint32_t channel1, uint32_t channel2){
 	PWMHandle = timmerHandler;
-	timmerChannel1 = TIM_CHANNEL_1;
-	timmerChannel2 = TIM_CHANNEL_2;
+	timmerChannel1 = channel1;
+	timmerChannel2 = channel2;
 	HAL_TIM_PWM_Start(&PWMHandle, timmerChannel1);
 	HAL_TIM_PWM_Start(&PWMHandle, timmerChannel2);
 }

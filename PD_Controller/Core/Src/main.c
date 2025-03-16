@@ -92,6 +92,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART2_UART_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -99,12 +100,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   // Initializing
-  motor_initEncoder(htim2);
-  motor_initPWM(htim1);
+  motor_initEncoder(htim2, TIM_CHANNEL_1, TIM_CHANNEL_2);
+  motor_initPWM(htim1, TIM_CHANNEL_1, TIM_CHANNEL_2);
   terminal_init(huart2);
 
-  terminal_print("Hello World!\r\n");
-
+  terminal_print("--- Controls Systems II ---\r\n");
+  terminal_print("     Servo Lab Project     \r\n");
 
   while (1)
   {
@@ -133,9 +134,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -146,11 +146,11 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI48;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -163,7 +163,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim){
+	if(htim == &htim3){
+		terminal_print("Hello from timmer 3");
+	}
+	else{
+		terminal_print("Hello from elseware");
+	}
+}
 /* USER CODE END 4 */
 
 /**

@@ -10,8 +10,8 @@
 
 #include "main.h"
 
-void motor_initEncoder(TIM_HandleTypeDef timmerHandler);
-void motor_initPWM(TIM_HandleTypeDef timmerHandler);
+void motor_initEncoder(TIM_HandleTypeDef timmerHandler, uint32_t channel1, uint32_t channel2);
+void motor_initPWM(TIM_HandleTypeDef timmerHandler, uint32_t channel1, uint32_t channel2);
 void motor_PWMSetForward(int x);
 void motor_PWMSetBackward(int x);
 int motor_getCount(void);

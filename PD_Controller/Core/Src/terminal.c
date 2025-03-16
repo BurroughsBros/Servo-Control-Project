@@ -30,10 +30,15 @@ void terminal_receive(uint8_t *rxBuff, size_t size){
 void terminal_print(char *txBuff){
 	// Has to be null terminated!
 	size_t len = strlen((char*)txBuff);
-	HAL_UART_Transmit(&terminal_uart, txBuff, len, TIMEOUT);
+	HAL_UART_Transmit(&terminal_uart, (uint8_t*)txBuff, len, TIMEOUT);
+}
+void terminal_print_IT(char *txBuff){
+	// Has to be null terminated!
+	size_t len = strlen((char*)txBuff);
+	HAL_UART_Transmit_IT(&terminal_uart, (uint8_t*)txBuff, len);
 }
 void terminal_clearBuff(char *buff){
-	size_t len = strlen(buff);
+	size_t len = strlen((char*)buff);
 	for(int i=0; i<len; i++){
 		buff[i] = '\0';
 	}
