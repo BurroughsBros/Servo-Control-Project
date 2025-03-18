@@ -52,12 +52,13 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int x = 0;
+int test = 0;
 /* USER CODE END 0 */
 
 /**
@@ -106,6 +107,8 @@ int main(void)
 
   terminal_print("--- Controls Systems II ---\r\n");
   terminal_print("     Servo Lab Project     \r\n");
+
+  terminal_print("Hello World!");
 
   while (1)
   {
@@ -163,13 +166,8 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim){
-	if(htim == &htim3){
-		terminal_print("Hello from timmer 3");
-	}
-	else{
-		terminal_print("Hello from elseware");
-	}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	test++;
 }
 /* USER CODE END 4 */
 
