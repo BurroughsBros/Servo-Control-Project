@@ -46,7 +46,22 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+// Global Variables
+int x = 0;
+int test = 0;
+// Copied from Arduino Code
+volatile int pwmValue = 0;
+volatile int adValue = 0;
+volatile int refValue = 0;
+float ek = 0;
+float mk = 0;
+float ek1 = 0;
+float mk1 = 0;
+const float kp = 2.00;
+const float Ts = 0.001;
+const float ki = 4.00;
+const float kdi = (Ts*ki)/2;
+int plantPWM = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,8 +72,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int x = 0;
-int test = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -105,18 +119,26 @@ int main(void)
   motor_initPWM(htim1, TIM_CHANNEL_1, TIM_CHANNEL_2);
   terminal_init(huart2);
 
+  terminal_print("---------------------------\r\n");
   terminal_print("--- Controls Systems II ---\r\n");
-  terminal_print("     Servo Lab Project     \r\n");
+  terminal_print("---  Servo Lab Project  ---\r\n");
+  terminal_print("---------------------------\r\n");
 
-  terminal_print("Hello World!");
+  HAL_TIM_Base_Start_IT(&htim3);
 
+  char rxBuff[100] = {'\0'};
+  char message[100] = {'\0'};
   while (1)
   {
-	  x = motor_getCount();
-
-	  while(motor_getCount() <= 5000){
-		  motor_PWMSetForward(500);
+	  // Terminal Print
+	  terminal_receive(rxBuff, sizeof(rxBuff));
+	  sscanf(rxBuff, "%d", &pwmValue);
+	  terminal_print("\r\n");
+	  HAL_Delay(2500);
+	  for (int i=1; i<=0; i++){
+		 sprintf(message, "AD Value = %d\r\n", adValue);
 	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -166,6 +188,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+// Timer callback
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	test++;
 }
