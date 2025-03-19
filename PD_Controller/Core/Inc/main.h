@@ -57,14 +57,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ENCODE_A_Pin GPIO_PIN_0
+#define ENCODE_A_Pin GPIO_PIN_5
 #define ENCODE_A_GPIO_Port GPIOA
-#define ENCODE_B_Pin GPIO_PIN_1
-#define ENCODE_B_GPIO_Port GPIOA
 #define MOTOR_IN1_Pin GPIO_PIN_8
 #define MOTOR_IN1_GPIO_Port GPIOA
 #define MOTOR_IN2_Pin GPIO_PIN_9
 #define MOTOR_IN2_GPIO_Port GPIOA
+#define ENCODE_B_Pin GPIO_PIN_3
+#define ENCODE_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -1,13 +1,14 @@
-10:14:11 **** Incremental Build of configuration Debug for project PD_Controller ****
+12:37:32 **** Incremental Build of configuration Debug for project PD_Controller ****
 make -j12 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F072xB -c -I../Core/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc "../Core/Src/terminal.c" -mcpu=cortex-m0 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F072xB -c -I../Core/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/terminal.d" -MT"Core/Src/terminal.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/terminal.o"
 ../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:134:28: warning: pointer targets in passing argument 1 of 'terminal_receive' differ in signedness [-Wpointer-sign]
-  134 |           terminal_receive(rxBuff, sizeof(rxBuff));
+../Core/Src/main.c:138:28: warning: pointer targets in passing argument 1 of 'terminal_receive' differ in signedness [-Wpointer-sign]
+  138 |           terminal_receive(rxBuff, sizeof(rxBuff));
       |                            ^~~~~~
       |                            |
       |                            char *
-In file included from ../Core/Src/main.c:28:
+In file included from ../Core/Src/main.c:29:
 ../Core/Inc/terminal.h:23:32: note: expected 'uint8_t *' {aka 'unsigned char *'} but argument is of type 'char *'
    23 | void terminal_receive(uint8_t *rxBuff, size_t size);
       |                       ~~~~~~~~~^~~~~~
@@ -17,11 +18,11 @@ Finished building target: PD_Controller.elf
 arm-none-eabi-size  PD_Controller.elf 
 arm-none-eabi-objdump -h -S PD_Controller.elf  > "PD_Controller.list"
    text	   data	    bss	    dec	    hex	filename
-  21096	     92	   2556	  23744	   5cc0	PD_Controller.elf
+  26508	     92	   2636	  29236	   7234	PD_Controller.elf
 Finished building: default.size.stdout
  
 Finished building: PD_Controller.list
  
 
-10:14:12 Build Finished. 0 errors, 1 warnings. (took 1s.43ms)
+12:37:33 Build Finished. 0 errors, 1 warnings. (took 917ms)
 

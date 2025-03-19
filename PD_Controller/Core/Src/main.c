@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -57,11 +58,13 @@ float ek = 0;
 float mk = 0;
 float ek1 = 0;
 float mk1 = 0;
+int plantPWM = 0;
+// Control system constants:
+// Change these constants to your own values
 const float kp = 2.00;
 const float Ts = 0.001;
 const float ki = 4.00;
 const float kdi = (Ts*ki)/2;
-int plantPWM = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,6 +111,7 @@ int main(void)
   MX_TIM2_Init();
   MX_USART2_UART_Init();
   MX_TIM3_Init();
+  MX_ADC_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -118,19 +122,19 @@ int main(void)
   motor_initEncoder(htim2, TIM_CHANNEL_1, TIM_CHANNEL_2);
   motor_initPWM(htim1, TIM_CHANNEL_1, TIM_CHANNEL_2);
   terminal_init(huart2);
+  // Start the timer interrupt
+  HAL_TIM_Base_Start_IT(&htim3);
 
+  // Header code
   terminal_print("---------------------------\r\n");
   terminal_print("--- Controls Systems II ---\r\n");
   terminal_print("---  Servo Lab Project  ---\r\n");
   terminal_print("---------------------------\r\n");
 
-  HAL_TIM_Base_Start_IT(&htim3);
-
   char rxBuff[100] = {'\0'};
   char message[100] = {'\0'};
   while (1)
   {
-	  // Terminal Print
 	  terminal_receive(rxBuff, sizeof(rxBuff));
 	  sscanf(rxBuff, "%d", &pwmValue);
 	  terminal_print("\r\n");
@@ -138,7 +142,6 @@ int main(void)
 	  for (int i=1; i<=0; i++){
 		 sprintf(message, "AD Value = %d\r\n", adValue);
 	  }
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -159,8 +162,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+  RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
+  RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -190,7 +195,27 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 // Timer callback
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	test++;
+	// This interrupt subroutine will run every T sec, where T is the period of Timer1
+	motor_PWMSetForward(pwmValue);	// Modify he duty cycle accordingly
+	adValue = HAL_ADC_GetValue(&hadc); // make sure the voltage is positive
+
+	ek = (float)(refValue - adValue);
+	mk = kdi*(ek + ek1) + mk1;
+	plantPWM = mk - kp*(float)(adValue);
+
+	// Saturation
+	if(plantPWM > 1023) plantPWM = 1023;
+	if(plantPWM < -1023) plantPWM = -1023;
+	// Change motor direction
+	if(plantPWM >= 0){
+		motor_PWMSetForward((int)plantPWM);
+	}
+	else{
+		motor_PWMSetBackward((int)plantPWM);
+	}
+
+	mk1 = mk;
+	ek1 = ek;
 }
 /* USER CODE END 4 */
 

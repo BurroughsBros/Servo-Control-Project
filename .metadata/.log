@@ -99,3 +99,40 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\jotto\GitRepo
 
 !ENTRY org.eclipse.cdt.core 1 0 2025-03-19 09:17:11.990
 !MESSAGE Indexed 'PD_Controller' (28 sources, 122 headers) in 8.62 sec: 11,010 declarations; 65,816 references; 2 unresolved inclusions; 33 syntax errors; 188 unresolved names (0.24%)
+!SESSION 2025-03-19 12:25:14.198 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  C:\Users\jotto\GitRepo\Servo-Control-Project\PD_Controller\.project
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\jotto\GitRepo\Servo-Control-Project\PD_Controller\.project
+
+!ENTRY org.eclipse.core.resources 2 10035 2025-03-19 12:25:20.118
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-19 12:25:23.454
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-19 12:25:23.454
+!MESSAGE Log4j2 initialized with config file C:\Users\jotto\GitRepo\Servo-Control-Project\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-19 12:25:53.422
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-03-19 12:26:00.123
+!MESSAGE Indexed 'PD_Controller' (31 sources, 126 headers) in 6.51 sec: 11,429 declarations; 70,389 references; 2 unresolved inclusions; 33 syntax errors; 201 unresolved names (0.25%)
+!SESSION 2025-03-19 12:27:01.269 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-19 12:27:07.011
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-19 12:27:07.012
+!MESSAGE Log4j2 initialized with config file C:\Users\jotto\GitRepo\Servo-Control-Project\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-19 12:27:25.762
+!MESSAGE Started RMI Server, listening on port 41337
