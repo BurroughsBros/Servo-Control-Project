@@ -53,6 +53,7 @@ int test = 0;
 // Copied from Arduino Code
 volatile int pwmValue = 0;
 volatile int refValue = 0;
+float converted = 0;
 float ek = 0;
 float mk = 0;
 float ek1 = 0;
@@ -61,8 +62,8 @@ int plantPWM = 0;
 float adValue = 0.0;
 // Control system constants:
 // Change these constants to your own values
-const float kp = 4.00;
-const float Ts = 0.001;
+const float kp = 8.2401;
+const float Ts = 0.0720;
 const float ki = 5.00;
 const float kdi = (Ts*ki)/2;
 /* USER CODE END PV */
@@ -138,7 +139,7 @@ int main(void)
 	  terminal_print("Enter Desired Position:");
 	  terminal_receive(rxBuff, sizeof(rxBuff));
 	  sscanf(rxBuff, "%d", &refValue);
-	  sprintf(txBuff, "Value Entered: %d\r\n", refValue);
+	  sprintf(txBuff, "\r\nValue Entered: %d\r\n", refValue);
 	  terminal_print(txBuff);
 	  HAL_Delay(2500);
 	  for (int i=1; i<=0; i++){
@@ -202,9 +203,13 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	// This interrupt subroutine will run every T seconds, where T is the period of the timer
 #ifdef CONTROLLER
+	x = motor_getCount();
+	// This interrupt subroutine will run every T sec, where T is the period of Timer1
+
 	motor_PWMSetForward(pwmValue);	// Modify he duty cycle accordingly
 
-	ek = (float)(refValue - motor_getCount());	// Position Error
+	converted =(motor_getCount())*0.036;
+	ek = (float)(refValue - converted);			// Position Error
 	mk = kdi*(ek + ek1) + mk1;					// Integral Calculation
 	plantPWM = mk + (kp * ek);					// PI control output
 
