@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -52,20 +52,22 @@ int x = 0;
 int test = 0;
 // Copied from Arduino Code
 volatile int pwmValue = 0;
-volatile int refValue = 0;
+volatile int refCount = 0;
 float converted = 0;
 float ek = 0;
 float mk = 0;
 float ek1 = 0;
-float mk1 = 0;
 int plantPWM = 0;
 float adValue = 0.0;
 // Control system constants:
 // Change these constants to your own values
-const float kp = 8.2401;
+const float kp = 9.396;
+const float kd = 0.733;
 const float Ts = 0.0720;
-const float ki = 5.00;
-const float kdi = (Ts*ki)/2;
+
+// Computed Coefficients (update when Kp, Kd, or Ts change)
+volatile float alpha1, alpha2;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,127 +82,127 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
+ * @brief  The application entry point.
+ * @retval int
+ */
+int main(void) {
 
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+	/* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
+	/* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+	/* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+	/* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+	/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_USART2_UART_Init();
-  MX_TIM3_Init();
-  MX_ADC_Init();
-  /* USER CODE BEGIN 2 */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_TIM1_Init();
+	MX_TIM2_Init();
+	MX_USART2_UART_Init();
+	MX_TIM3_Init();
+	MX_ADC_Init();
+	/* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
+	/* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  // Initializing
-  motor_initEncoder(htim2, TIM_CHANNEL_1, TIM_CHANNEL_2);
-  motor_initPWM(htim1, TIM_CHANNEL_1, TIM_CHANNEL_2);
-  terminal_init(huart2);
-  // Start the timer interrupt
-  HAL_TIM_Base_Start_IT(&htim3);
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	// Initializing
+	motor_initEncoder(htim2, TIM_CHANNEL_1, TIM_CHANNEL_2);
+	motor_initPWM(htim1, TIM_CHANNEL_1, TIM_CHANNEL_2);
+	terminal_init(huart2);
+	// Start the timer interrupt
+	HAL_TIM_Base_Start_IT(&htim3);
 
-  // Header code
-  terminal_print("---------------------------\r\n");
-  terminal_print("--- Controls Systems II ---\r\n");
-  terminal_print("---  Servo Lab Project  ---\r\n");
-  terminal_print("---------------------------\r\n");
+	// Header code
+	terminal_print("---------------------------\r\n");
+	terminal_print("--- Controls Systems II ---\r\n");
+	terminal_print("---  Servo Lab Project  ---\r\n");
+	terminal_print("---------------------------\r\n");
 
-  char rxBuff[100] = {'\0'};
-  char txBuff[100] = {'\0'};
-  while (1)
-  {
-	  terminal_print("Enter Desired Position:");
-	  terminal_receive(rxBuff, sizeof(rxBuff));
-	  sscanf(rxBuff, "%d", &refValue);
-	  sprintf(txBuff, "\r\nValue Entered: %d\r\n", refValue);
-	  terminal_print(txBuff);
-	  HAL_Delay(2500);
-	  for (int i=1; i<=0; i++){
-		  sprintf(txBuff, "AD Value = %f\r\n", adValue);
-		  terminal_print(txBuff);
-	  }
-	  terminal_clearBuff(rxBuff);
-	  terminal_clearBuff(txBuff);
-    /* USER CODE END WHILE */
+	char rxBuff[100] = { '\0' };
+	char txBuff[100] = { '\0' };
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+	// Initialize controller coefficients
+	alpha1 = kp + (2 * kd / Ts);
+	alpha2 = kp - (2 * kd / Ts);
+
+	while (1) {
+		terminal_print("Enter Desired Position:");
+		terminal_receive(rxBuff, sizeof(rxBuff));
+		sscanf(rxBuff, "%d", &refCount);
+		sprintf(txBuff, "\r\nValue Entered: %d\r\n", refCount);
+		terminal_print(txBuff);
+		HAL_Delay(2500);
+		for (int i = 1; i <= 0; i++) {
+			sprintf(txBuff, "AD Value = %f\r\n", adValue);
+			terminal_print(txBuff);
+		}
+		terminal_clearBuff(rxBuff);
+		terminal_clearBuff(txBuff);
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
+	}
+	/* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSI48;
-  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
-  RCC_OscInitStruct.HSI14CalibrationValue = 16;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14
+			| RCC_OSCILLATORTYPE_HSI48;
+	RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+	RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
+	RCC_OscInitStruct.HSI14CalibrationValue = 16;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		Error_Handler();
+	}
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI48;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+			| RCC_CLOCKTYPE_PCLK1;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI48;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
+		Error_Handler();
+	}
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+	PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /* USER CODE BEGIN 4 */
 // Timer callback
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	// This interrupt subroutine will run every T seconds, where T is the period of the timer
 #ifdef CONTROLLER
 	x = motor_getCount();
@@ -208,23 +210,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 	motor_PWMSetForward(pwmValue);	// Modify he duty cycle accordingly
 
-	converted =(motor_getCount())*0.036;
-	ek = (float)(refValue - converted);			// Position Error
-	mk = kdi*(ek + ek1) + mk1;					// Integral Calculation
-	plantPWM = mk + (kp * ek);					// PI control output
+	converted = (motor_getCount()) * 0.036;
+	//Compute current error
+	ek = (float) (refCount - converted);
+	//Compute control output
+	mk = alpha1 * ek - alpha2 * ek1;
+	// PD control output
+	plantPWM = mk;
 
 	// Saturation
-	if(plantPWM > 1023) plantPWM = 1023;
-	if(plantPWM < -1023) plantPWM = -1023;
+	if (plantPWM > 1023)
+		plantPWM = 1023;
+	if (plantPWM < -1023)
+		plantPWM = -1023;
 	// Change motor direction
-	if(plantPWM >= 0){
-		motor_PWMSetForward((int)plantPWM);
-	}
-	else{
-		motor_PWMSetBackward(abs((int)plantPWM));
+	if (plantPWM >= 0) {
+		motor_PWMSetForward((int) plantPWM);
+	} else {
+		motor_PWMSetBackward(abs((int) plantPWM));
 	}
 
-	mk1 = mk;	// Update mk values
 	ek1 = ek;	// Update ek values
 #else
 	test++;
@@ -233,18 +238,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 /* USER CODE END 4 */
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
