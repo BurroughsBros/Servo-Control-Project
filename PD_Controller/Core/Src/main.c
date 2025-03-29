@@ -204,9 +204,7 @@ void SystemClock_Config(void) {
 // Timer callback
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	// This interrupt subroutine will run every T seconds, where T is the period of the timer
-#ifdef CONTROLLER
 	x = motor_getCount();
-	// This interrupt subroutine will run every T sec, where T is the period of Timer1
 
 	motor_PWMSetForward(pwmValue);	// Modify he duty cycle accordingly
 
@@ -231,9 +229,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 
 	ek1 = ek;	// Update ek values
-#else
-	test++;
-#endif
 }
 /* USER CODE END 4 */
 
